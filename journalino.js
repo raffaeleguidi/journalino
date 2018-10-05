@@ -1,4 +1,9 @@
+
 var log = require('gelf-pro');
+
+const _tcp = require('gelf-pro/lib/adapter/tcp');
+const _udp = require('gelf-pro/lib/adapter/udp');
+const _tcpTls = require('gelf-pro/lib/adapter/tcp-tls');
 
 const pollJournal = (onData) => {
     const shell = require('shelljs');

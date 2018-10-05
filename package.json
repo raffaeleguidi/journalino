@@ -5,7 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "gelf-pro": "^1.2.2",
-    "graygelf": "^1.2.0",
     "parameters": "^0.4.3",
     "@studio/ndjson": "^2.0.0",
     "shelljs": "^0.8.2"
