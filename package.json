@@ -4,11 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@studio/ndjson": "^2.0.0",
-    "gelf": "^2.0.1",
     "gelf-pro": "^1.2.2",
     "graygelf": "^1.2.0",
-    "shelljs": "^0.8.2",
-    "syslog-client": "^1.1.1"
+    "parameters": "^0.4.3",
+    "shelljs": "^0.8.2"
   }
 }

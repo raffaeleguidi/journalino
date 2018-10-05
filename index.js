@@ -1,35 +1,11 @@
-const graylog = {
-    host: "lb-tns",
-    //host: "lb-middleware.load-balancers.prod.bnlpositivity.it",
-    port: 52201
-}
-
 var log = require('gelf-pro');
-
-log.setConfig({
-    // fields: {facility: "example", owner: "Tom (a cat)"}, // optional; default fields for all messages
-    // filter: [], // optional; filters to discard a message
-    // transform: [], // optional; transformers for a message
-    // broadcast: [], // optional; listeners of a message
-    // levels: {}, // optional; default: see the levels section below
-    // aliases: {}, // optional; default: see the aliases section below
-    adapterName: 'tcp', // optional; currently supported "udp", "tcp" and "tcp-tls"; default: udp
-    adapterOptions: { // this object is passed to the adapter.connect() method
-      // common
-      host: graylog.host, // optional; default: 127.0.0.1
-      port: graylog.port, // optional; default: 12201
-      timeout: 1000, // tcp only; optional; default: 10000 (10 sec)
-    }
-});
-
 
 const pollJournal = (onData) => {
     const shell = require('shelljs');
-    const { StringifyTransform, ParseTransform } = require('@studio/ndjson');
     const PassThrough = require('stream').PassThrough;
 
     if (!shell.which('journalctl')) {
-        shell.echo('Sorry, this script requires journalctl');
+        console.log('***', 'Sorry, this script requires journalctl', '***');
         shell.exit(1);
     }
 
@@ -44,7 +20,57 @@ const pollJournal = (onData) => {
     journalctl.stdout.pipe(new ParseTransform()).pipe(output)
 }
 
-console.log("journal-2-gelf forwarder starting");
+parameters = require('parameters');
+
+command = parameters({
+    name: 'journalino',
+    description: 'Start log forwarding',
+    options: [{
+      name: 'host', 
+      description: 'Graylog host',
+      required: true
+    },{
+        name: 'port', shortcut: 'p', type: 'integer', 
+        description: 'Graylog port - default is "12201"',
+        default:  12201
+    },{
+      name: 'protocol',  
+      description: 'Protocol - tcp or udp, default is "udp"',
+      default:  "udp"
+    }]
+});
+
+var config;
+
+try {
+    config = command.parse();
+    if (config.help) {
+        console.log(command.help());
+        return;
+    }
+} catch (ex) {
+    // Print help
+    console.error("***", ex.message + ". Use -h for help", "***")
+    return;
+}
+
+console.log("journalino forwarder starting");
+
+log.setConfig({
+    // fields: {facility: "example", owner: "Tom (a cat)"}, // optional; default fields for all messages
+    // filter: [], // optional; filters to discard a message
+    // transform: [], // optional; transformers for a message
+    // broadcast: [], // optional; listeners of a message
+    // levels: {}, // optional; default: see the levels section below
+    // aliases: {}, // optional; default: see the aliases section below
+    adapterName: config.protocol, // optional; currently supported "udp", "tcp" and "tcp-tls"; default: udp
+    adapterOptions: { // this object is passed to the adapter.connect() method
+      // common
+      host: config.host, // optional; default: 127.0.0.1
+      port: config.port, // optional; default: 12201
+      timeout: 1000, // tcp only; optional; default: 10000 (10 sec)
+    }
+});
 
 pollJournal((entry) => {
     if (entry.CONTAINER_NAME) {
