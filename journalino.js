@@ -19,7 +19,6 @@ const pollJournal = (onData) => {
 
     output.on('data', (entry) => {
         onData(entry)
-        //console.log(entry.__REALTIME_TIMESTAMP, entry._HOSTNAME, entry.SYSLOG_IDENTIFIER, entry._SYSTEMD_UNIT, entry.MESSAGE);
     });
 
     var journalctl = shell.exec('journalctl -o json -f', { async:true, silent: true });
