@@ -3,6 +3,7 @@ var log = require('gelf-pro');
 const pollJournal = (onData) => {
     const shell = require('shelljs');
     const PassThrough = require('stream').PassThrough;
+    const { StringifyTransform, ParseTransform } = require('@studio/ndjson');
 
     if (!shell.which('journalctl')) {
         console.log('***', 'Sorry, this script requires journalctl', '***');
