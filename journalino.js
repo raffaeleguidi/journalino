@@ -55,7 +55,10 @@ try {
     return;
 }
 
-console.log("journalino forwarder starting");
+const startMessage = "journalino forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
+
+console.log(startMessage);
+log.info(startMessage);
 
 log.setConfig({
     // fields: {facility: "example", owner: "Tom (a cat)"}, // optional; default fields for all messages
