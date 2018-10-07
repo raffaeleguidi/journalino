@@ -33,7 +33,7 @@ journalino forwarder starting with target host: graylog.mydomain.com port: 12201
 
 All bugs are mine - overall awesomeness inherited by these wonderful packages:
 
-https://www.npmjs.com/package/shelljs
-https://www.npmjs.com/package/gelf-pro
-https://www.npmjs.com/package/parameters
+* [shelljs](https://www.npmjs.com/package/shelljs)
+* [gelf-pro](https://www.npmjs.com/package/gelf-pro)
+* [parameters](https://www.npmjs.com/package/parameters)
 
