@@ -24,8 +24,8 @@ EXAMPLES
 ### Example usage
 Forward journald logs to graylog.mydomain.com using tcp port 12201:
 ```
-# ./journalino --host graylog.mydomain.com --tcp 12201 
-journalino forwarder starting with target host: graylog.mydomain.com port: 12201 protocol: udp
+# ./journalino --host graylog.mydomain.com --protocol tcp
+journalino forwarder starting with target host: graylog.mydomain.com port: 12201 protocol: tcp
 ```
 
 ### Credits
