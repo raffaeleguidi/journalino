@@ -1,9 +1,10 @@
 
 var log = require('gelf-pro');
 
-const _tcp = require('gelf-pro/lib/adapter/tcp');
-const _udp = require('gelf-pro/lib/adapter/udp');
-const _tcpTls = require('gelf-pro/lib/adapter/tcp-tls');
+require('gelf-pro/lib/adapter/abstract');
+require('gelf-pro/lib/adapter/tcp');
+require('gelf-pro/lib/adapter/udp');
+require('gelf-pro/lib/adapter/tcp-tls');
 
 const pollJournal = (onData) => {
     const shell = require('shelljs');
@@ -32,15 +33,15 @@ command = parameters({
     description: 'Start log forwarding',
     options: [{
       name: 'host', 
-      description: 'Graylog host',
+      description: 'Graylog host.',
       required: true
     },{
         name: 'port', shortcut: 'p', type: 'integer', 
-        description: 'Graylog port - default is "12201"',
+        description: 'Graylog port - default is 12201.',
         default:  12201
     },{
       name: 'protocol',  
-      description: 'Protocol - tcp or udp, default is "udp"',
+      description: 'Protocol - tcp or udp, default is "udp".',
       default:  "udp"
     }]
 });
@@ -54,7 +55,6 @@ try {
         return;
     }
 } catch (ex) {
-    // Print help
     console.error("***", ex.message + ". Use -h for help", "***")
     return;
 }
