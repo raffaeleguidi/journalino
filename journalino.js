@@ -82,6 +82,7 @@ log.setConfig({
 
 pollJournal((entry) => {
     if (entry.CONTAINER_NAME) {
+        if (typeof entry.MESSAGE != "string") entry.MESSAGE = entry.MESSAGE.join(",");
         log.info(entry.MESSAGE, entry, function (err, bytesSent) {
             if (err) console.log("gelf error:", err)
         });
