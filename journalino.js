@@ -80,9 +80,13 @@ log.setConfig({
     }
 });
 
+function stringFromArray(data) {
+   return data.map(b => { return String.fromCharCode(b)}).join("")
+}
+
 pollJournal((entry) => {
     if (entry.CONTAINER_NAME) {
-        if (typeof entry.MESSAGE != "string") entry.MESSAGE = entry.MESSAGE.join(",");
+        if (typeof entry.MESSAGE != "string") entry.MESSAGE = stringFromArray(entry.MESSAGE);
         log.info(entry.MESSAGE, entry, function (err, bytesSent) {
             if (err) console.log("gelf error:", err)
         });
