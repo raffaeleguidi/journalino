@@ -1,4 +1,3 @@
-
 var log = require('gelf-pro');
 
 require('gelf-pro/lib/adapter/abstract');
@@ -6,24 +5,67 @@ require('gelf-pro/lib/adapter/tcp');
 require('gelf-pro/lib/adapter/udp');
 require('gelf-pro/lib/adapter/tcp-tls');
 
-const pollJournal = (onData) => {
-    const shell = require('shelljs');
-    const PassThrough = require('stream').PassThrough;
-    const { StringifyTransform, ParseTransform } = require('@studio/ndjson');
 
-    if (!shell.which('journalctl')) {
+const pollJournalNonJson = (onData) => {
+
+    const shell = require('shelljs');
+
+    const PassThrough = require('stream').PassThrough; if (!shell.which('journalctl')) {
         console.log('***', 'Sorry, this script requires journalctl', '***');
         shell.exit(1);
     }
-
     const output = new PassThrough({ objectMode: true });
 
     output.on('data', (entry) => {
         onData(entry)
     });
 
-    var journalctl = shell.exec('journalctl -o json -f', { async:true, silent: true });
-    journalctl.stdout.pipe(new ParseTransform()).pipe(output)
+
+  
+const options="--output-fields=CONTAINER_ID,CONTAINER_ID_FULL,CONTAINER_NAME,CONTAINER_TAG,MESSAGE,_HOSTNAME,level,message,severity,source,timestamp";
+var command='journalctl   --all -o verbose -f '
+if(config.x){
+command+=options
+}
+
+var journalctl = shell.exec(command, { async: true, silent: true });
+
+
+
+    journalctl.stdout.on('data', (entry) => {
+
+
+        const str = entry.split("\n");
+        var ret = {};
+       
+        for (i in str) {
+
+            const keypar = str[i].split("=")
+
+               
+            if ((keypar[1]) && (keypar[0])) {
+
+                if (keypar[0].includes("CET")){
+                  //  console.log(" false key"+ keypar[1])
+            
+            }else{
+            
+                
+                ret[keypar[0].trim()] = keypar[1].trim();
+              
+            }
+
+        }
+
+
+        }
+     
+  
+       onData(ret)
+    
+        
+
+    });
 }
 
 parameters = require('parameters');
@@ -43,7 +85,13 @@ command = parameters({
       name: 'protocol',  
       description: 'Protocol - tcp or udp, default is "udp".',
       default:  "udp"
-    }]
+    },
+    {
+    name: 'ext',  
+    description: 'ext - only send container fields trough gelf (option valid only for recent journalctl versions supporting --output-fields option ).',
+    default:  "false"
+    },
+]
 });
 
 var config;
@@ -59,7 +107,7 @@ try {
     return;
 }
 
-const startMessage = "journalino forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
+const startMessage = "journalino 1.1 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
 
 console.log(startMessage);
 log.info(startMessage);
@@ -84,11 +132,25 @@ function stringFromArray(data) {
    return data.map(b => { return String.fromCharCode(b)}).join("")
 }
 
-pollJournal((entry) => {
-    if (entry.CONTAINER_NAME) {
-        if (typeof entry.MESSAGE != "string") entry.MESSAGE = stringFromArray(entry.MESSAGE);
-        log.info(entry.MESSAGE, entry, function (err, bytesSent) {
+
+pollJournalNonJson((entry) => {
+
+   if (entry.CONTAINER_NAME) {
+      if (typeof entry.MESSAGE != "string") {
+            try {
+          
+          entry.MESSAGE = stringFromArray(entry.MESSAGE);
+            } catch (error) {
+                console.log(" failmessage "+  entry.MESSAGE)
+            }
+
+        }
+        log.info(   entry.MESSAGE, entry,function (err, bytesSent) {
             if (err) console.log("gelf error:", err)
         });
-    }
+
+
+       
+  
+}
 })

@@ -1,12 +1,12 @@
 {
   "name": "journal-to-gelf",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@studio/ndjson": "^2.0.0",
     "gelf-pro": "^1.2.2",
     "parameters": "^0.4.3",
-    "@studio/ndjson": "^2.0.0",
     "shelljs": "^0.8.2"
   }
 }
