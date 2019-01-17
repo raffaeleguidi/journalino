@@ -1,9 +1,10 @@
 var log = require('gelf-pro');
-
+//var _ = require('lodash')
 require('gelf-pro/lib/adapter/abstract');
 require('gelf-pro/lib/adapter/tcp');
 require('gelf-pro/lib/adapter/udp');
 require('gelf-pro/lib/adapter/tcp-tls');
+
 
 const pollJournalNonJson = (onData) => {
 
@@ -23,10 +24,13 @@ const pollJournalNonJson = (onData) => {
   
 const options="--output-fields=CONTAINER_ID,CONTAINER_ID_FULL,CONTAINER_NAME,CONTAINER_TAG,MESSAGE,_HOSTNAME,level,message,severity,source,timestamp";
 var command='journalctl   --all -o verbose -f '
+
+//console.log("command " +command)
+ 
 if(config.x){
 command+=options
 }
-
+ 
 var journalctl = shell.exec(command, { async: true, silent: true });
 
 
@@ -36,29 +40,35 @@ var journalctl = shell.exec(command, { async: true, silent: true });
 
         const str = entry.split("\n");
         var ret = {};
-       
-        for (i in str) {
+     //   console.log("str " +str)
+ 
+      
+    for (i in str) {
 
-            const keypar = str[i].split("=")
+  
+        var index = str[i].indexOf("=");
+        var key =str[i].substring(0, index);
+        var value =str[i].substring(index +1, str[i].length); 
+   //     console.log("key " +key  +" value " +value)
+        
+        
+        if ((key) && (value)) {
 
-               
-            if ((keypar[1]) && (keypar[0])) {
-
-                if (keypar[0].includes("CET")){
-                  //  console.log(" false key"+ keypar[1])
-            
-            }else{
-            
-                
-                ret[keypar[0].trim()] = keypar[1].trim();
-              
-            }
-
+            if (key.includes("CET")){
+        
+        
+        }else{
+        
+            ret[key.trim()] = value.trim();
+         
+         //   ret[keypar[0].trim()] = keypar[1].trim();
+          
         }
 
+    }
 
-        }
-     
+
+    }
   
        onData(ret)
     
@@ -106,7 +116,7 @@ try {
     return;
 }
 
-const startMessage = "journalino 1.1 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
+const startMessage = "journalino 1.4 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
 
 console.log(startMessage);
 log.info(startMessage);
@@ -123,7 +133,7 @@ log.setConfig({
       // common
       host: config.host, // optional; default: 127.0.0.1
       port: config.port, // optional; default: 12201
-      timeout: 1000, // tcp only; optional; default: 10000 (10 sec)
+      timeout: 30000, // tcp only; optional; default: 10000 (10 sec)
     }
 });
 
@@ -133,8 +143,8 @@ function stringFromArray(data) {
 
 
 pollJournalNonJson((entry) => {
-
-   if (entry.CONTAINER_NAME) {
+console.log(entry)
+ //  if (entry.CONTAINER_NAME) {
       if (typeof entry.MESSAGE != "string") {
             try {
           
@@ -151,5 +161,5 @@ pollJournalNonJson((entry) => {
 
        
   
-}
+//}
 })
