@@ -27,7 +27,7 @@ var command='journalctl   --all -o verbose -f '
 
 //console.log("command " +command)
  
-if(config.x){
+if(config.ext){
 command+=options
 }
  
@@ -41,14 +41,14 @@ var journalctl = shell.exec(command, { async: true, silent: true });
         const str = entry.split("\n");
         var ret = {};
      //   console.log("str " +str)
- 
+        var index,key,  value;
       
     for (i in str) {
 
   
-        var index = str[i].indexOf("=");
-        var key =str[i].substring(0, index);
-        var value =str[i].substring(index +1, str[i].length); 
+         index = str[i].indexOf("=");
+         key =str[i].substring(0, index);
+         value =str[i].substring(index +1, str[i].length); 
    //     console.log("key " +key  +" value " +value)
         
         
@@ -143,8 +143,8 @@ function stringFromArray(data) {
 
 
 pollJournalNonJson((entry) => {
-console.log(entry)
- //  if (entry.CONTAINER_NAME) {
+//console.log(entry)
+  if (entry.CONTAINER_NAME) {
       if (typeof entry.MESSAGE != "string") {
             try {
           
@@ -161,5 +161,5 @@ console.log(entry)
 
        
   
-//}
+}
 })
