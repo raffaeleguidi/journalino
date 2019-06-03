@@ -7,10 +7,11 @@ require('gelf-pro/lib/adapter/tcp-tls');
 
 
 const pollJournalNonJson = (onData) => {
-
     const shell = require('shelljs');
 
-    const PassThrough = require('stream').PassThrough; if (!shell.which('journalctl')) {
+    const PassThrough = require('stream').PassThrough; 
+
+    if (!shell.which('journalctl')) {
         console.log('***', 'Sorry, this script requires journalctl', '***');
         shell.exit(1);
     }
@@ -22,58 +23,47 @@ const pollJournalNonJson = (onData) => {
 
 
   
-const options="--output-fields=CONTAINER_ID,CONTAINER_ID_FULL,CONTAINER_NAME,CONTAINER_TAG,MESSAGE,_HOSTNAME,level,message,severity,source,timestamp";
-var command='journalctl   --all -o verbose -f '
+   const options="--output-fields=CONTAINER_ID,CONTAINER_ID_FULL,CONTAINER_NAME,CONTAINER_TAG,MESSAGE,_HOSTNAME,level,message,severity,source,timestamp";
+   var command='journalctl --all -o verbose -f '
 
-//console.log("command " +command)
+//   console.log("executing command " +command)
  
-if(config.ext){
-command+=options
-}
+   if(config.ext){
+     command+=options
+   }
  
-var journalctl = shell.exec(command, { async: true, silent: true });
+   var journalctl = shell.exec(command, { async: true, silent: true });
+
+   if (journalctl.code !== 0) {
+     shell.echo('error: command failed - execute it manually to see the error code');
+     shell.echo(command);
+     shell.exit(1);
+   }
+
+   //console.log(journalctl);
 
 
-
-    journalctl.stdout.on('data', (entry) => {
-
-
+   journalctl.stdout.on('data', (entry) => {
         const str = entry.split("\n");
         var ret = {};
-     //   console.log("str " +str)
+    //   console.log("str " +str)
         var index,key,  value;
-      
-    for (i in str) {
-
-  
+       
+      for (i in str) {
          index = str[i].indexOf("=");
          key =str[i].substring(0, index);
          value =str[i].substring(index +1, str[i].length); 
    //     console.log("key " +key  +" value " +value)
         
-        
         if ((key) && (value)) {
-
             if (key.includes("CET")){
-        
-        
-        }else{
-        
-            ret[key.trim()] = value.trim();
-         
-         //   ret[keypar[0].trim()] = keypar[1].trim();
-          
+            } else {
+              ret[key.trim()] = value.trim();
+           //   ret[keypar[0].trim()] = keypar[1].trim();
+            }
         }
-
-    }
-
-
-    }
-  
-       onData(ret)
-    
-        
-
+      }
+      onData(ret)
     });
 }
 
@@ -118,8 +108,8 @@ try {
 
 const startMessage = "journalino 1.4 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
 
-console.log(startMessage);
-log.info(startMessage);
+//console.log(startMessage);
+//log.info(startMessage);
 
 log.setConfig({
     // fields: {facility: "example", owner: "Tom (a cat)"}, // optional; default fields for all messages
@@ -143,23 +133,17 @@ function stringFromArray(data) {
 
 
 pollJournalNonJson((entry) => {
-//console.log(entry)
+  console.log(entry)
   if (entry.CONTAINER_NAME) {
       if (typeof entry.MESSAGE != "string") {
             try {
-          
-          entry.MESSAGE = stringFromArray(entry.MESSAGE);
+                entry.MESSAGE = stringFromArray(entry.MESSAGE);
             } catch (error) {
                 console.log(" failmessage "+  entry.MESSAGE)
             }
-
-        }
-        log.info(   entry.MESSAGE, entry,function (err, bytesSent) {
-            if (err) console.log("gelf error:", err)
-        });
-
-
-       
-  
-}
+      }
+      log.info(   entry.MESSAGE, entry,function (err, bytesSent) {
+         if (err) console.log("gelf error:", err)
+      });
+   }
 })
