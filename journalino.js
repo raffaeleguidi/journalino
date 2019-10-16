@@ -76,6 +76,6 @@ journal.stdout
   .pipe(ndjson.parse())
   .on('data', function(entry){
     entry.MESSAGE = stripAnsi(Buffer.from(entry.MESSAGE,'utf8').toString());
-    entry.timestamp = (parseInt(entry._SOURCE_REALTIME_TIMESTAMP)/1000000).toFixed(4);
+    entry.timestamp = (parseInt(entry._SOURCE_REALTIME_TIMESTAMP)/1000000);
     sendToHost(entry)
 });
