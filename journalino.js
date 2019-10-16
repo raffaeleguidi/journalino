@@ -7,12 +7,13 @@ require('gelf-pro/lib/adapter/tcp-tls');
 const ndjson = require('ndjson');
 const through2 = require("through2");
 const spawn = require('child_process').spawn;
+const stripAnsi = require('strip-ansi');
 
 parameters = require('parameters');
 
 command = parameters({
     name: 'journalino',
-    description: 'Start log forwarding',
+    description: 'Start log forwarding - v1.5',
     options: [{
         name: 'host', 
         description: 'Graylog host.',
@@ -25,10 +26,6 @@ command = parameters({
         name: 'protocol',  
         description: 'Protocol - tcp or udp, default is "udp".',
         default:  "udp"
-    },{
-        name: 'dry',  
-        description: '"dry run - only send logs to stdout',
-        default:  false
     }
     /*,
     {
@@ -52,9 +49,8 @@ try {
     return;
 }
 
-console.log(config);
 
-const startMessage = "journalino 1.4 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
+const startMessage = "journalino 1.5 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
 
 gelf.setConfig({
     adapterName: config.protocol, // optional; currently supported "udp", "tcp" and "tcp-tls"; default: udp
@@ -65,45 +61,21 @@ gelf.setConfig({
     }
 });
 
-var journal = spawn('journalctl', ['--all', '-o', 'verbose', '--output', 'json', '-f']);
-
-journal.stdout
-  .pipe(ndjson.parse())
-  .pipe(through2.obj(function (chunk, enc, callback) {
-    this.push({...chunk, MESSAGE: Buffer.from(chunk.MESSAGE,'utf8').toString()});
-    callback()
-  }))
-  .on('data', function(entry){
-    console.log(entry.CONTAINER_NAME, entry.__REALTIME_TIMESTAMP, entry.MESSAGE);
-});
+var journal = spawn('journalctl', ['--all', '--output', 'json', '-f']);
 
 const sendToHost = (entry) => {
   if (entry.CONTAINER_NAME) {
-    if (typeof entry.MESSAGE != "string") {
-          try {
-              entry.MESSAGE = stringFromArray(entry.MESSAGE);
-              console.log(entry)
-          } catch (error) {
-              console.log(" failmessage "+  entry.MESSAGE)
-          }
-    }
-    gelf.info(   entry.MESSAGE, entry,function (err, bytesSent) {
+    console.log(entry.timestamp, entry.CONTAINER_NAME, entry.MESSAGE);
+    gelf.info(entry.MESSAGE, entry,function (err, bytesSent) {
        if (err) console.log("gelf error:", err)
     });
-    }
+  }
 }
 
 journal.stdout
   .pipe(ndjson.parse())
-  .pipe(through2.obj(function (chunk, enc, callback) {
-    if (typeof entry.MESSAGE != "string") {
-        this.push({...chunk, MESSAGE: Buffer.from(chunk.MESSAGE,'utf8').toString()});
-    } else {
-        this.push(chunk);
-    }
-    callback()
-  }))
   .on('data', function(entry){
-    console.log(entry.CONTAINER_NAME, entry.__REALTIME_TIMESTAMP, entry.MESSAGE);
+    entry.MESSAGE = stripAnsi(Buffer.from(entry.MESSAGE,'utf8').toString());
+    entry.timestamp = (parseInt(entry._SOURCE_REALTIME_TIMESTAMP)/1000000).toFixed(4);
     sendToHost(entry)
 });
