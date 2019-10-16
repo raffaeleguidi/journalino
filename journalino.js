@@ -24,12 +24,13 @@ const pollJournalNonJson = (onData) => {
 
   
    const options="--output-fields=CONTAINER_ID,CONTAINER_ID_FULL,CONTAINER_NAME,CONTAINER_TAG,MESSAGE,_HOSTNAME,level,message,severity,source,timestamp";
-   var command='journalctl --all -o verbose -f '
+   var command='journalctl --all -o verbose -f'
 
 //   console.log("executing command " +command)
  
-   if(config.ext){
-     command+=options
+   if(config.ext == true){
+     console.log("starting with ext fields");
+     command+= " " + options
    }
  
    var journalctl = shell.exec(command, { async: true, silent: true });
@@ -40,7 +41,7 @@ const pollJournalNonJson = (onData) => {
      shell.exit(1);
    }
 
-   //console.log(journalctl);
+   console.log(journalctl);
 
 
    journalctl.stdout.on('data', (entry) => {
@@ -133,17 +134,18 @@ function stringFromArray(data) {
 
 
 pollJournalNonJson((entry) => {
-  console.log(entry)
+  //console.log(entry)
   if (entry.CONTAINER_NAME) {
       if (typeof entry.MESSAGE != "string") {
             try {
                 entry.MESSAGE = stringFromArray(entry.MESSAGE);
+                console.log(entry)
             } catch (error) {
                 console.log(" failmessage "+  entry.MESSAGE)
             }
       }
-      log.info(   entry.MESSAGE, entry,function (err, bytesSent) {
-         if (err) console.log("gelf error:", err)
-      });
+      //log.info(   entry.MESSAGE, entry,function (err, bytesSent) {
+      //   if (err) console.log("gelf error:", err)
+      //});
    }
 })
