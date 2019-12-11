@@ -5,7 +5,7 @@ const stripAnsi = require('strip-ansi');
 var fs = require("fs");
 
 const testFromFile = () => {
-  const stream = fs.createReadStream("./msg.txt");
+  const stream = fs.createReadStream("./msg.json");
 
   const sendToHost = (entry) => {
     if (entry.CONTAINER_NAME) {
@@ -26,7 +26,7 @@ const testFromFile = () => {
       sendToHost(entry)
   });
 }
-  
+
 testFromFile()
 
 const testFromJournal = () => {
