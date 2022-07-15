@@ -7,7 +7,7 @@ A journald to GELF forwarder for docker logs. It will forward all journald docke
 # ./journalino -h
 
 NAME
-    journalino - Start log forwarding
+    journalino - Start log forwarding v1.6
 
 SYNOPSIS
     journalino [journalino options]
@@ -17,7 +17,9 @@ OPTIONS
     -p --port               Graylog port - default is 12201.
     --protocol              Protocol - tcp or udp, default is "udp".
     -h --help               Display help information
-
+    -a --all                Whether we should send all logs instead of only docker logs - default is false
+    -h --help               Display help information
+    
 EXAMPLES
     journalino --help       Show this message
 ```
