@@ -13,7 +13,7 @@ parameters = require('parameters');
 
 command = parameters({
     name: 'journalino',
-    description: 'Start log forwarding - v1.5',
+    description: 'Start log forwarding - v1.6',
     options: [{
         name: 'host', 
         description: 'Graylog host.',
