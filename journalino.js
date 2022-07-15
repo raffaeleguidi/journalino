@@ -26,6 +26,14 @@ command = parameters({
         name: 'protocol',  
         description: 'Protocol - tcp or udp, default is "udp".',
         default:  "udp"
+    },{
+        name: 'environment',  shortcut: 'e', type: "string",
+        description: 'The environment we are running into - i.e. "dev", "QA" or "prod". No default',
+        default:  ""
+    },{
+        name: 'all',  shortcut: 'a', type: "boolean",
+        description: 'Whether we should send all logs instead of only docker logs - default is false',
+        default:  false
     }
     /*,
     {
@@ -61,10 +69,12 @@ gelf.setConfig({
     }
 });
 
+console.log(config.all)
+
 var journal = spawn('journalctl', ['--all', '--output', 'json', '-f']);
 
 const sendToHost = (entry) => {
-  if (entry.CONTAINER_NAME) {
+  if (entry.CONTAINER_NAME || config.all) {
     console.log(entry.timestamp, entry.CONTAINER_NAME, entry.MESSAGE);
     gelf.info(entry.MESSAGE, entry,function (err, bytesSent) {
        if (err) console.log("gelf error:", err)
@@ -77,5 +87,6 @@ journal.stdout
   .on('data', function(entry){
     entry.MESSAGE = stripAnsi(Buffer.from(entry.MESSAGE,'utf8').toString());
     entry.timestamp = (parseInt(entry._SOURCE_REALTIME_TIMESTAMP)/1000000);
+    if (config.environment) entry.ENVIRONMENT = config.environment;
     sendToHost(entry)
 });
