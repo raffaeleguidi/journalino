@@ -58,7 +58,7 @@ try {
 }
 
 
-const startMessage = "journalino 1.5 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
+const startMessage = "journalino 1.6 forwarder starting with target host: " + config.host + " port: " + config.port + " protocol: " + config.protocol;
 
 gelf.setConfig({
     adapterName: config.protocol, // optional; currently supported "udp", "tcp" and "tcp-tls"; default: udp
