@@ -4,7 +4,7 @@ A journald to GELF forwarder for docker logs. It will forward all journald docke
 ### Options
 
 ```
-# ./journalino -h
+# node journalino-agent -h
 
 NAME
     journalino - Start log forwarding v1.6
@@ -18,6 +18,7 @@ OPTIONS
     --protocol              Protocol - tcp or udp, default is "udp".
     -h --help               Display help information
     -a --all                Whether we should send all logs instead of only docker logs - default is false
+    -l --listen             Whether we should listen on port TCP 12200 instead of using journalctl
     -h --help               Display help information
     
 EXAMPLES
